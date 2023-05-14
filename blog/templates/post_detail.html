@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Post Detail</title>
+  <!-- Include Bootstrap CSS here -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <style>
+    .post-image {
+      max-width: 40%;
+      height: auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="row">
+      <div class="col-md-8">
+        <h2>{{ post.title }}</h2>
+        <p>Author: {{ post.author }}</p>
+        <p>{{ post.content }}</p>
+        {% if post.image %}
+          <img src="{{ post.image.url }}" alt="Post Image" class="img-fluid post-image">
+        {% endif %}
+        <button id="like-button" class="btn btn-primary">Like</button>
+        <span id="like-count">{{ post.likes.count }}</span>
+      </div>
+      <div class="col-md-4">
+        <!-- Sidebar content -->
+      </div>
+    </div>
+
+    <!-- Comments section -->
+    <div class="row">
+      <div class="col-md-8">
+        <h3>Comments</h3>
+        {% for comment in comments %}
+          <div class="card mb-3">
+            <div class="card-body">
+              <h5 class="card-title">{{ comment.author }}</h5>
+              <p class="card-text">{{ comment.content }}</p>
+            </div>
+          </div>
+        {% empty %}
+          <p>No comments yet.</p>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Add a comment -->
+    <div class="row">
+      <div class="col-md-8">
+        <h3>Add a Comment</h3>
+        <form method="post">
+          {% csrf_token %}
+          <div class="form-group">
+            <label for="comment">Comment:</label>
+            <textarea class="form-control" id="comment" name="comment" rows="4"></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary">Submit Comment</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Include Bootstrap JS and custom script here -->
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+  <script>
+    const likeButton = document.getElementById("like-button");
+    const likeCount = document.getElementById("like-count");
+    let isLiked = false;
+
+    likeButton.addEventListener("click", function() {
+      if (isLiked) {
+        // Perform unlike functionality here
+        // You can make an AJAX request to a Django view or update the like count using JavaScript
+
+        // Update the button text and color
+        likeButton.textContent = "Like";
+        likeButton.classList.remove("btn-danger");
+        likeButton.classList.add("btn-primary");
+
+        // Decrement the like count
+        likeCount.textContent = parseInt(likeCount.textContent) - 1;
+      } else {
+        // Perform like functionality here
+        // You can make an AJAX request to a Django view or update the like count using JavaScript
+
+        // Update the button text and color
+        likeButton.textContent = "Unlike";
+        likeButton.classList.remove("btn-primary");
+        likeButton.classList.add("btn-danger");
+
+        // Increment the like count
+        likeCount.textContent = parseInt(likeCount.textContent) + 1;
+      }
+
+      // Toggle the liked status
+      isLiked = !isLiked;
+    });
+  </script>
+</body>
+</html>

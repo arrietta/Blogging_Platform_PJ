@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instagram</title>
+    <link href="{% static 'styles.css' %}" rel="stylesheet"></head>
+<style>
+        @media only screen and (max-width: 767px) {
+          .imq {
+            display: none;
+          }
+        }
+    </style>
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+</head>
+<body>
+  <div class="container">
+      <div class="row">
+          <div class="col-sm-6 imq" >
+              <img src="https://media.gcflearnfree.org/content/633d944b3823fb02e84dce55_10_05_2022/Screen%20Shot%202022-10-10%20at%202.28.19%20PM.png" class="phone">
+          </div>
+          <div class="col-sm-6 pt-5">
+              <div class="right-column text-center">
+                {% if error_message %}
+                <div class="alert alert-danger">{{ error_message }}</div>
+                {% endif %}
+                  <img src="{% static 'insta..jpg' %}" class="instagram-logo">
+                  <p class="info">Sign up to see photo and video form your friends.</p>
+                  <form method="post">
+                    {% csrf_token %}
+                    <div class="form-group">
+                      <input type="text" class="form-control" id="username" name="username" placeholder="Username" required>
+                    </div>
+                    <div class="form-group">
+                      <input type="password" class="form-control" id="password" name="password" placeholder="Password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Login</button>
+                  </form>
+              </div>
+              <div class="right-column-login text-center">
+                  <p>Don't have an account?<a href="{% url 'register' %}"> Register</a>></p>
+          </div>
+      </div>
+  </div>
+</div>
+</div>
+</body>
+
+</html>

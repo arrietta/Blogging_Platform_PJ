@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <div class="container">
+    {% for post in posts %}
+      <div class="card mb-4" style="width: 60%; align-content: center; margin: auto">
+        <img src="{{ post.image.url }}" class="card-img-top" alt="Post Image">
+        <div class="card-body">
+          <h5 class="card-title">
+            <a href="{% url 'profile' username=post.author.username %}">
+              {{ post.title }}
+            </a>
+          </h5>
+          <p class="card-text">
+            Author:
+            <a href="{% url 'profile' username=post.author.username %}">
+              {{ post.author.username }}
+            </a>
+          </p>
+          <p>{{ post.content }}</p>  <!-- Add this line to display the content of the post -->
+
+          {% if request.user.is_authenticated %}
+            <button id="like-btn-{{ post.pk }}" class="btn btn-primary">Like <span id="like-count-{{ post.pk }}">{{ post.likes.count }}</span></button>
+          {% else %}
+            <a href="{% url 'login' %}" class="btn btn-primary">Like <span id="like-count-{{ post.pk }}">{{ post.likes.count }}</span></a>
+          {% endif %}
+        </div>
+      </div>
+    {% endfor %}
+
+  </div>
+
+  {% block script %}
+    <script>
+      {% for post in posts %}
+        // Like button click handler for post with ID "{{ post.pk }}"
+        document.getElementById('like-btn-{{ post.pk }}').addEventListener('click', function() {
+          fetch('{% url 'like_post' pk=post.pk %}', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({})
+          })
+          .then(response => response.json())
+          .then(data => {
+            // Update the like count for post with ID "{{ post.pk }}"
+            document.getElementById('like-count-{{ post.pk }}').textContent = data.likes_count;
+          });
+        });
+      {% endfor %}
+    </script>
+  {% endblock %}
+{% endblock %}
