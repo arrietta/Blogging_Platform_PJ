@@ -51,8 +51,6 @@ def create_post(request):
             post = form.save(commit=False)
             post.author = request.user
             post.save()
-
-
             profile = Profile.objects.get(user=request.user)
             profile.posts.add(post)
 
