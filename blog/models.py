@@ -24,7 +24,7 @@ class Profile(models.Model):
     name = models.CharField(max_length=255, default='John')
     surname = models.CharField(max_length=255, default='Doe')
     info = models.TextField(default='No information available')
-    image = models.ImageField(upload_to='profile_images')
+    image = models.ImageField(upload_to='profile_images' ,default='default_image.jpg')
     posts = models.ManyToManyField(Post, related_name='profiles')
     followers = models.ManyToManyField(User, related_name='following', blank=True)
     following = models.ManyToManyField(User, related_name='followers', blank=True)
