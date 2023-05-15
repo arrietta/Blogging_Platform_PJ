@@ -25,5 +25,5 @@ class PostForm(forms.ModelForm):
         fields = ['title', 'content', 'image']
 class CommentForm(forms.Form):
     post_id = forms.IntegerField(widget=forms.HiddenInput())
-    content = forms.CharField(widget=forms.Textarea(attrs={'rows': 3}))
+    content = forms.CharField(widget=forms.Textarea())
 
