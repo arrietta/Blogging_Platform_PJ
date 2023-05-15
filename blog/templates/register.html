@@ -31,12 +31,12 @@
                           {{ user_form.username.errors }}
                         </div>
                         <div class="form-group">
-                            <input type="text" name="{{ user_form.password1.name }}" id="{{ user_form.password1.id_for_label }}" class="form-control" placeholder="Password" size="45" value="{{ user_form.password1.value|default:"" }}">
+                            <input type="password" name="{{ user_form.password1.name }}" id="{{ user_form.password1.id_for_label }}" class="form-control" placeholder="Password" size="45" value="{{ user_form.password1.value|default:"" }}">
                           {{ user_form.password1.errors }}
                         </div>
                         <div class="form-group">
 
-                            <input type="text" name="{{ user_form.password2.name }}" id="{{ user_form.password2.id_for_label }}" class="form-control" placeholder="Confirm Password" size="45" value="{{ user_form.password2.value|default:"" }}">
+                            <input type="password" name="{{ user_form.password2.name }}" id="{{ user_form.password2.id_for_label }}" class="form-control" placeholder="Confirm Password" size="45" value="{{ user_form.password2.value|default:"" }}">
                           {{ user_form.password2.errors }}
                         </div>
 
