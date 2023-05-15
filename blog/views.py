@@ -61,9 +61,14 @@ def create_post(request):
         form = PostForm()
     return render(request, 'create_post.html', {'form': form})
 
-
+@login_required(login_url='login')
 def home(request):
-    posts = Post.objects.order_by('?')  # Random order
+    query = request.GET.get('q')
+    if query:
+        posts = Post.objects.filter(title__icontains=query)
+    else:
+        posts = Post.objects.order_by('?')  # Random order
+
     if request.method == 'POST':
         form = CommentForm(request.POST)
         if form.is_valid():
@@ -73,11 +78,13 @@ def home(request):
             return redirect('home')
     else:
         form = CommentForm()
+
     context = {
         'posts': posts,
         'form': form,
     }
     return render(request, 'home.html', context)
+
 
 
 
@@ -172,3 +179,11 @@ def follow_profile(request, profile_id):
     request.session['previous_url'] = request.META.get('HTTP_REFERER', '/')
 
     return redirect(request.session.get('previous_url'))
+def search_view(request):
+    query = request.GET.get('q')
+    posts = Post.objects.filter(title__icontains=query)
+    context = {
+        'query': query,
+        'posts': posts
+    }
+    return render(request, 'search.html', context)

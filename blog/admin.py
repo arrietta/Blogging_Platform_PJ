@@ -1,15 +1,7 @@
 from django.contrib import admin
-from .models import Post, Profile
-
-@admin.register(Post)
-class PostAdmin(admin.ModelAdmin):
-    list_display = ('title', 'author', 'likes_count')
-    list_filter = ('author',)
-    search_fields = ('title', 'author__username')
-
-    def likes_count(self, obj):
-        return obj.likes.count()
+from .models import Profile
 
 @admin.register(Profile)
 class ProfileAdmin(admin.ModelAdmin):
-    list_display = ('user', 'image')
+    list_display = ('user', 'name', 'surname')
+    search_fields = ('user__username', 'name', 'surname')
