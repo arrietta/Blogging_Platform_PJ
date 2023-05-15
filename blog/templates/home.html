@@ -67,7 +67,7 @@
     {% block script %}
   <script>
     {% for post in posts %}
-      // Like button click handler for post with ID "{{ post.pk }}"
+
       document.getElementById('like-btn-{{ post.pk }}').addEventListener('click', function() {
         fetch('{% url 'like_post' pk=post.pk %}', {
           method: 'POST',
@@ -79,12 +79,11 @@
         })
           .then(response => response.json())
           .then(data => {
-            // Update the like count for post with ID "{{ post.pk }}"
+
             document.getElementById('like-count-{{ post.pk }}').textContent = data.likes_count;
           });
       });
 
-      // Comment button click handler for post with ID "{{ post.pk }}"
       const commentForm{{ post.pk }} = document.getElementById('comment-form-{{ post.pk }}');
       const commentBtn{{ post.pk }} = document.getElementById('comment-btn-{{ post.pk }}');
       const commentList{{ post.pk }} = document.getElementById('comment-list-{{ post.pk }}');
@@ -97,7 +96,7 @@
         }
       });
 
-      // Comment form submission handler for post with ID "{{ post.pk }}"
+
       commentForm{{ post.pk }}.addEventListener('submit', function(event) {
         event.preventDefault();
         const form = event.target;

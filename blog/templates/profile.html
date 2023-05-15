@@ -62,12 +62,10 @@
 <header class="flex flex-wrap items-center p-5 md:py-8 ">
 
       <div class="md:w-3/12 md:ml-16">
-        <!-- profile image -->
         <img class="w-20 h-20 md:w-40 md:h-40 object-cover rounded-full
                      border-2 border-pink-600 p-1" src="{{ profile.image.url }}" alt="profile">
       </div>
 
-      <!-- profile meta -->
       <div class="w-8/12 md:w-7/12 ml-4">
         <div class="md:flex md:flex-wrap md:items-center mb-4">
           <h2 class="text-3xl inline-block font-light md:mr-2 mb-2 sm:mb-0">
@@ -98,7 +96,6 @@
           </li>
         </ul>
 
-        <!-- user meta form medium screens -->
         <div class="hidden md:block">
           <h1 class="font-semibold">{{ profile.user.username }}</h1>
           <span class="bioclass">{{ profile.info }}</span>

@@ -52,7 +52,7 @@ def create_post(request):
             post.author = request.user
             post.save()
 
-            # Save the post in the user's profile
+
             profile = Profile.objects.get(user=request.user)
             profile.posts.add(post)
 
@@ -67,7 +67,7 @@ def home(request):
     if query:
         posts = Post.objects.filter(title__icontains=query)
     else:
-        posts = Post.objects.order_by('?')  # Random order
+        posts = Post.objects.order_by('?')
 
     if request.method == 'POST':
         form = CommentForm(request.POST)
@@ -112,9 +112,6 @@ def profile_view(request):
     context = {'profile': profile}
     return render(request, 'profile.html', context)
 
-
-
-
 @login_required(login_url='login')
 def like_post(request, pk):
     post = Post.objects.get(pk=pk)
@@ -154,7 +151,6 @@ def add_comment(request, post_id):
         comment = Comment(content=content, post=post, user=request.user)
         comment.save()
 
-        # You can return a JSON response with the comment data
         return JsonResponse({
             'content': comment.content,
             'username': comment.user.username
@@ -169,21 +165,10 @@ def follow_profile(request, profile_id):
 
     if user.is_authenticated:
         if user in profile.followers.all():
-            # User is already following the profile, so unfollow
             profile.followers.remove(user)
         else:
-            # User is not following the profile, so follow
             profile.followers.add(user)
-
-    # Store the previous URL in the session
     request.session['previous_url'] = request.META.get('HTTP_REFERER', '/')
 
     return redirect(request.session.get('previous_url'))
-def search_view(request):
-    query = request.GET.get('q')
-    posts = Post.objects.filter(title__icontains=query)
-    context = {
-        'query': query,
-        'posts': posts
-    }
-    return render(request, 'search.html', context)
+
