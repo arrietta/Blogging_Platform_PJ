@@ -1,6 +1,15 @@
+
+<head>
+    <title>Profile</title>
+</head>
 {% extends 'base.html' %}
+{% load static %}
 
 {% block content %}
+
+    <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css'>
+<link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/1.4.6/tailwind.min.css'>
+    <link href="{% static 'styles.css' %}" rel="stylesheet">
     <style>
     .profile-image-container {
       width: 150px;
@@ -30,57 +39,206 @@
         align-items: center;
 
     }
+    .pb-full {
+  padding-bottom: 100%;
+}
+
+.bioclass{
+  color: #8E8E8E;
+}
+
+/* hide search icon on search focus */
+.search-bar:focus + .fa-search{
+  display: none;
+}
+
+@media screen and (min-width: 768px) {
+  .post:hover .overlay {
+    display: block;
+  }
+}
   </style>
   <div class="container">
+<header class="flex flex-wrap items-center p-5 md:py-8 ">
 
-    <div class="row br" style=" align-content: center;">
-        <div class="card cad" style="width: 18rem; ">
-          <div class="profile-image-container">
-            <img src="{{ profile.image.url }}" class="profile-image" alt="Profile Image">
-          </div>
+      <div class="md:w-3/12 md:ml-16">
+        <!-- profile image -->
+        <img class="w-20 h-20 md:w-40 md:h-40 object-cover rounded-full
+                     border-2 border-pink-600 p-1" src="{{ profile.image.url }}" alt="profile">
+      </div>
+
+      <!-- profile meta -->
+      <div class="w-8/12 md:w-7/12 ml-4">
+        <div class="md:flex md:flex-wrap md:items-center mb-4">
+          <h2 class="text-3xl inline-block font-light md:mr-2 mb-2 sm:mb-0">
+            {{ profile.name }} {{ profile.surname }}
+          </h2>
+
+          {% if request.user != profile.user %}
+            {% if request.user in profile.followers.all %}
+                <a href="{% url 'follow_profile' profile_id=profile.id %}" class="bg-gray-500 px-2 py-1 text-white font-semibold text-sm rounded block text-center sm:inline-block block">Following</a>
+            {% else %}
+                <a href="{% url 'follow_profile' profile_id=profile.id %}" class="bg-blue-500 px-2 py-1 text-white font-semibold text-sm rounded block text-center sm:inline-block block">Follow</a>
+            {% endif %}
+        {% endif %}
         </div>
-        <div class="card cad" >
-          <div class="card-body">
-            <h5 class="card-title">{{ profile.name }} {{ profile.surname }}</h5>
-            <p class="card-text">{{ profile.info }}</p>
-            <!-- Additional profile information can be displayed here -->
-          </div>
+        <ul class="hidden md:flex space-x-8 mb-4">
+          <li>
+            <span class="font-semibold">{{ profile.posts.count }}</span>
+            posts
+          </li>
+
+          <li>
+            <span class="font-semibold">{{ profile.followers.count }}</span>
+            followers
+          </li>
+          <li>
+            <span class="font-semibold">{{ profile.following.count }}</span>
+            following
+          </li>
+        </ul>
+
+        <!-- user meta form medium screens -->
+        <div class="hidden md:block">
+          <h1 class="font-semibold">{{ profile.user.username }}</h1>
+          <span class="bioclass">{{ profile.info }}</span>
+
+
         </div>
 
-    </div>
+      </div>
+
+
+
+    </header>
+
 
 
     {% if profile.posts.all %}
-      <div class="row">
+      <div class="mt-5">
         {% for post in profile.posts.all %}
-          <div class="card mb-4" style="width: 60%; align-content: center; margin: auto">
-            <img src="{{ post.image.url }}" class="card-img-top" alt="Post Image">
-            <div class="card-body">
-              <h5 class="card-title">
-                <a href="{% url 'profile' username=post.author.username %}">
-                  {{ post.title }}
-                </a>
-              </h5>
-              <p class="card-text">
-                Author:
-                <a href="{% url 'profile' username=post.author.username %}">
-                  {{ post.author.username }}
-                </a>
-              </p>
-              <p>{{ post.content }}</p>  <!-- Add this line to display the content of the post -->
-              <p>Likes: <span id="like-count-{{ post.pk }}">{{ post.likes.count }}</span></p>
-              {% if request.user.is_authenticated %}
-                <button id="like-btn-{{ post.pk }}" class="btn btn-primary">Like</button>
-              {% else %}
-                <a href="{% url 'login' %}" class="btn btn-primary">Like</a>
-              {% endif %}
+          <div class="post" style="width: 45%; margin: auto">
+        <div class="info">
+          <div class="user">
+            <div class="profile-pic" style="float: right;">
+              <img src="{{ post.author.profile.image.url }}" alt="">
             </div>
+            <p class="username" style="float: right; margin-right: 10px;">{{ post.author.username }}</p>
+            <div style="clear: both;"></div>
           </div>
+        </div>
+        <img src="{{ post.image.url }}" class="post-image" alt="">
+        <div class="post-content">
+        {% if request.user.is_authenticated %}
+          <div class="reaction-wrapper">
+
+              <button style="margin: 0" id="like-btn-{{ post.pk }}" class="btn">
+                <img style="margin: 0; padding: 0;" src="{% static 'heart.png' %}" class="icon" alt="">
+              </button>
+              <button style="margin: 0" id="comment-btn-{{ post.pk }}" class="btn ml-auto">
+                <img style="margin: 0" src="{% static 'comment.png' %}" class="icon" alt="">
+              </button>
+
+
+
+          </div>
+
+          <p class="likes"><span id="like-count-{{ post.pk }}">{{ post.likes.count }}</span> likes</p>
+          <h3 class="description">{{ post.title }}</h3>
+          <h5 class="description">{{ post.content }}</h5>
+            <ul id="comment-list-{{ post.pk }}" style="list-style:none; padding-left: 2% ;display: none">
+            {% for comment in post.comments.all %}
+              <li>{{ comment.user.username }} : {{ comment.content }}  </li>
+            {% endfor %}
+            </ul>
+        {% else %}
+            <a href="{% url 'login' %}" class="btn btn-primary">Like</a>
+        {% endif %}
+        </div>
+        <div class="comment-wrapper">
+          <img src="{% static 'smile.png' %}" class="icon" alt="">
+            <form method="POST" id="comment-form-{{ post.pk }}" class="comment-wrapper">
+              {% csrf_token %}
+              <input type="hidden" name="post_id" value="{{ post.pk }}">
+              <div class="form-group">
+                <input type="text" id="comment-{{ post.pk }}" class="comment-box" name="content" placeholder="Add a comment" required>
+              </div>
+              <button type="submit" class="comment-btn">post</button>
+            </form>
+        </div>
+      </div>
         {% endfor %}
+
+
       </div>
     {% else %}
       <p>No posts available.</p>
     {% endif %}
   </div>
+{% block script %}
+  <script>
+    {% for post in profile.posts.all %}
+      // Like button click handler for post with ID "{{ post.pk }}"
+      document.getElementById('like-btn-{{ post.pk }}').addEventListener('click', function() {
+        fetch('{% url 'like_post' pk=post.pk %}', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+          },
+          body: JSON.stringify({})
+        })
+        .then(response => response.json())
+        .then(data => {
+          // Update the like count for post with ID "{{ post.pk }}"
+          document.getElementById('like-count-{{ post.pk }}').textContent = data.likes_count;
+        });
+      });
+
+      // Comment form submission handler for post with ID "{{ post.pk }}"
+      document.getElementById('comment-form-{{ post.pk }}').addEventListener('submit', function(event) {
+        event.preventDefault();
+        const form = event.target;
+        const formData = new FormData(form);
+        const commentContent = formData.get('content');
+        const postID = form.getAttribute('data-post-id');
+
+        fetch('{% url 'add_comment' post_id=post.pk %}', {
+          method: 'POST',
+          headers: {
+            'X-CSRFToken': '{{ csrf_token }}'
+          },
+          body: new URLSearchParams(formData)
+        })
+        .then(response => response.json())
+        .then(data => {
+          const commentList = document.getElementById('comment-list-{{ post.pk }}');
+          const listItem = document.createElement('li');
+          listItem.innerText =data.username + ' : ' +data.content ;
+          commentList.appendChild(listItem);
+          form.reset();
+        })
+        .catch(error => console.error(error));
+      });
+
+      const commentForm{{ post.pk }} = document.getElementById('comment-form-{{ post.pk }}');
+      const commentBtn{{ post.pk }} = document.getElementById('comment-btn-{{ post.pk }}');
+      const commentList{{ post.pk }} = document.getElementById('comment-list-{{ post.pk }}');
+
+      commentBtn{{ post.pk }}.addEventListener('click', function() {
+        if (commentList{{ post.pk }}.style.display === 'none') {
+          commentList{{ post.pk }}.style.display = 'block';
+        } else {
+          commentList{{ post.pk }}.style.display = 'none';
+        }
+      });
+
+      // Hide/show comments toggle button for post with ID "{{ post.pk }}"
+
+    {% endfor %}
+  </script>
+{% endblock %}
+
 
 {% endblock %}
+

@@ -1,55 +1,128 @@
 {% extends 'base.html' %}
 
 {% block content %}
-  <div class="container">
+    {% load static %}
+    <link href="{% static 'styles.css' %}" rel="stylesheet">
+    <div class="container" style="padding-top: 50px ">
     {% for post in posts %}
-      <div class="card mb-4" style="width: 60%; align-content: center; margin: auto">
-        <img src="{{ post.image.url }}" class="card-img-top" alt="Post Image">
-        <div class="card-body">
-          <h5 class="card-title">
-            <a href="{% url 'profile' username=post.author.username %}">
-              {{ post.title }}
-            </a>
-          </h5>
-          <p class="card-text">
-            Author:
-            <a href="{% url 'profile' username=post.author.username %}">
-              {{ post.author.username }}
-            </a>
-          </p>
-          <p>{{ post.content }}</p>  <!-- Add this line to display the content of the post -->
+      <div class="post" style="width: 45%; margin: auto">
+        <div class="info">
 
-          {% if request.user.is_authenticated %}
-            <button id="like-btn-{{ post.pk }}" class="btn btn-primary">Like <span id="like-count-{{ post.pk }}">{{ post.likes.count }}</span></button>
-          {% else %}
-            <a href="{% url 'login' %}" class="btn btn-primary">Like <span id="like-count-{{ post.pk }}">{{ post.likes.count }}</span></a>
-          {% endif %}
+            <a href="{% url 'profile' username=post.author.username %}">
+                <div class="user">
+                <div class="profile-pic" style="float: right;">
+                  <img src="{{ post.author.profile.image.url }}" alt="">
+                </div>
+                <p class="username" style="float: right; margin-right: 10px;">{{ post.author.username }}</p>
+                <div style="clear: both;"></div>
+              </div>
+            </a>
+
+            </a>
+
+        </div>
+        <img src="{{ post.image.url }}" class="post-image" alt="">
+        <div class="post-content">
+        {% if request.user.is_authenticated %}
+          <div class="reaction-wrapper">
+
+              <button style="margin: 0" id="like-btn-{{ post.pk }}" class="btn">
+                <img style="margin: 0; padding: 0;" src="{% static 'heart.png' %}" class="icon" alt="">
+              </button>
+              <button style="margin: 0" id="comment-btn-{{ post.pk }}" class="btn ml-auto">
+                <img style="margin: 0" src="{% static 'comment.png' %}" class="icon" alt="">
+              </button>
+
+
+
+          </div>
+
+          <p class="likes"><span id="like-count-{{ post.pk }}">{{ post.likes.count }}</span> likes</p>
+          <h3 class="description">{{ post.title }}</h3>
+          <h5 class="description">{{ post.content }}</h5>
+            <ul id="comment-list-{{ post.pk }}" style="list-style:none; padding-left: 2% ;display: none">
+            {% for comment in post.comments.all %}
+              <li>{{ comment.user.username }} : {{ comment.content }}  </li>
+            {% endfor %}
+            </ul>
+        {% else %}
+            <a href="{% url 'login' %}" class="btn btn-primary">Like</a>
+        {% endif %}
+        </div>
+        <div class="comment-wrapper">
+          <img src="{% static 'smile.png' %}" class="icon" alt="">
+            <form method="POST" id="comment-form-{{ post.pk }}" class="comment-wrapper">
+              {% csrf_token %}
+              <input type="hidden" name="post_id" value="{{ post.pk }}">
+              <div class="form-group">
+                <input type="text" id="comment-{{ post.pk }}" class="comment-box" name="content" placeholder="Add a comment" required>
+              </div>
+              <button type="submit" class="comment-btn">post</button>
+            </form>
         </div>
       </div>
     {% endfor %}
-
   </div>
 
-  {% block script %}
-    <script>
-      {% for post in posts %}
-        // Like button click handler for post with ID "{{ post.pk }}"
-        document.getElementById('like-btn-{{ post.pk }}').addEventListener('click', function() {
-          fetch('{% url 'like_post' pk=post.pk %}', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'X-CSRFToken': '{{ csrf_token }}'
-            },
-            body: JSON.stringify({})
-          })
+    {% block script %}
+  <script>
+    {% for post in posts %}
+      // Like button click handler for post with ID "{{ post.pk }}"
+      document.getElementById('like-btn-{{ post.pk }}').addEventListener('click', function() {
+        fetch('{% url 'like_post' pk=post.pk %}', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+          },
+          body: JSON.stringify({})
+        })
           .then(response => response.json())
           .then(data => {
             // Update the like count for post with ID "{{ post.pk }}"
             document.getElementById('like-count-{{ post.pk }}').textContent = data.likes_count;
           });
-        });
-      {% endfor %}
-    </script>
-  {% endblock %}
+      });
+
+      // Comment button click handler for post with ID "{{ post.pk }}"
+      const commentForm{{ post.pk }} = document.getElementById('comment-form-{{ post.pk }}');
+      const commentBtn{{ post.pk }} = document.getElementById('comment-btn-{{ post.pk }}');
+      const commentList{{ post.pk }} = document.getElementById('comment-list-{{ post.pk }}');
+
+      commentBtn{{ post.pk }}.addEventListener('click', function() {
+        if (commentList{{ post.pk }}.style.display === 'none') {
+          commentList{{ post.pk }}.style.display = 'block';
+        } else {
+          commentList{{ post.pk }}.style.display = 'none';
+        }
+      });
+
+      // Comment form submission handler for post with ID "{{ post.pk }}"
+      commentForm{{ post.pk }}.addEventListener('submit', function(event) {
+        event.preventDefault();
+        const form = event.target;
+        const formData = new FormData(form);
+        const commentContent = formData.get('content');
+
+        fetch('{% url 'add_comment' post_id=post.pk %}', {
+          method: 'POST',
+          headers: {
+            'X-CSRFToken': '{{ csrf_token }}'
+          },
+          body: new URLSearchParams(formData)
+        })
+          .then(response => response.json())
+          .then(data => {
+            const commentList = document.getElementById('comment-list-{{ post.pk }}');
+            const listItem = document.createElement('li');
+            listItem.innerText = data.username  + ' :' +  data.content ;
+            commentList.appendChild(listItem);
+            form.reset();
+          })
+          .catch(error => console.error(error));
+      });
+    {% endfor %}
+  </script>
+{% endblock %}
+
 {% endblock %}

@@ -1,5 +1,5 @@
 from django.contrib.auth.forms import UserCreationForm
-from .models import Post
+from .models import Post, Comment
 from django import forms
 from django.contrib.auth.models import User
 from .models import Profile
@@ -23,4 +23,7 @@ class PostForm(forms.ModelForm):
     class Meta:
         model = Post
         fields = ['title', 'content', 'image']
+class CommentForm(forms.Form):
+    post_id = forms.IntegerField(widget=forms.HiddenInput())
+    content = forms.CharField(widget=forms.Textarea(attrs={'rows': 3}))
 

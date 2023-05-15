@@ -6,9 +6,9 @@ from django.http import  JsonResponse, HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 
-from .forms import PostForm, ProfileRegistrationForm
+from .forms import PostForm, ProfileRegistrationForm, CommentForm
 
-from .models import Post, Profile
+from .models import Post, Profile, Comment
 
 
 def register(request):
@@ -62,19 +62,23 @@ def create_post(request):
     return render(request, 'create_post.html', {'form': form})
 
 
-
-@login_required(login_url='login')
 def home(request):
-    posts = Post.objects.all().order_by('?')
-    try:
-        profile = request.user.profile
-    except Profile.DoesNotExist:
-        profile = None
+    posts = Post.objects.order_by('?')  # Random order
+    if request.method == 'POST':
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            post_id = form.cleaned_data['post_id']
+            post = Post.objects.get(pk=post_id)
+            Comment.objects.create(post=post, user=request.user, content=form.cleaned_data['content'])
+            return redirect('home')
+    else:
+        form = CommentForm()
     context = {
         'posts': posts,
-        'profile': profile
+        'form': form,
     }
     return render(request, 'home.html', context)
+
 
 
 @login_required
@@ -133,3 +137,38 @@ def profile(request, username):
     }
 
     return render(request, 'profile.html', context)
+
+
+def add_comment(request, post_id):
+    post = get_object_or_404(Post, pk=post_id)
+
+    if request.method == 'POST':
+        content = request.POST.get('content')
+        comment = Comment(content=content, post=post, user=request.user)
+        comment.save()
+
+        # You can return a JSON response with the comment data
+        return JsonResponse({
+            'content': comment.content,
+            'username': comment.user.username
+        })
+    else:
+        return redirect('post_detail', pk=post.pk)
+
+
+def follow_profile(request, profile_id):
+    profile = Profile.objects.get(id=profile_id)
+    user = request.user
+
+    if user.is_authenticated:
+        if user in profile.followers.all():
+            # User is already following the profile, so unfollow
+            profile.followers.remove(user)
+        else:
+            # User is not following the profile, so follow
+            profile.followers.add(user)
+
+    # Store the previous URL in the session
+    request.session['previous_url'] = request.META.get('HTTP_REFERER', '/')
+
+    return redirect(request.session.get('previous_url'))
