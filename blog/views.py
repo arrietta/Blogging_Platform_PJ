@@ -157,8 +157,6 @@ def add_comment(request, post_id):
         })
     else:
         return redirect('post_detail', pk=post.pk)
-
-
 def follow_profile(request, profile_id):
     profile = Profile.objects.get(id=profile_id)
     user = request.user
@@ -166,9 +164,12 @@ def follow_profile(request, profile_id):
     if user.is_authenticated:
         if user in profile.followers.all():
             profile.followers.remove(user)
+            user.profile.following.remove(profile.user)
         else:
             profile.followers.add(user)
+            user.profile.following.add(profile.user)
     request.session['previous_url'] = request.META.get('HTTP_REFERER', '/')
 
     return redirect(request.session.get('previous_url'))
+
 
